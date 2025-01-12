@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ChatComponent } from './components/chat/chat.component';
+import { ChatComponent } from './pages/chat/chat.component';
 import { AuthService } from './core/services/auth.service';
 import { LoginComponent } from './pages/login/login.component';
 

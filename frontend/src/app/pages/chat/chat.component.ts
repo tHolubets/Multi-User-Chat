@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ChatService } from '../../core/services/chat.service';
 import { DatePipe } from '@angular/common';
 import { DateFormatPipe } from "../../core/pipes/date-format.pipe";
+import { ToastrModule, ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'app-chat',
@@ -14,7 +15,8 @@ import { DateFormatPipe } from "../../core/pipes/date-format.pipe";
     imports: [
         CommonModule,
         FormsModule,
-        DateFormatPipe
+        DateFormatPipe,
+        ToastrModule
     ],
     providers: [DatePipe],
     templateUrl: './chat.component.html',
@@ -33,16 +35,21 @@ export class ChatComponent implements OnInit, OnDestroy {
     constructor(
         private webSocketService: WebSocketService,
         private authService: AuthService,
-        private chatService: ChatService
+        private chatService: ChatService,
+        private readonly toastrService: ToastrService,
     ) {
         this.username = this.authService.getUsername();
     }
 
     ngOnInit() {
         this.loadMessages();
+        this.webSocketService.initClient();
         this.webSocketService.connect();
         this.webSocketService.getMessages().subscribe((message: ChatMessageDto) => {
+            const wasScrollAtBottom = this.isScrollAtBottom();
             this.messages.push(message);
+            if (wasScrollAtBottom)
+                this.scrollToBottom();
         });
     }
 
@@ -51,35 +58,63 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     public loadMessages(): void {
+        const prevScrollHeight = this.messagesContainer?.nativeElement.scrollHeight;
         this.chatService.getMessages(this.page, this.size).subscribe((response) => {
-            this.messages = response.messages;
+            this.messages = [...response.messages.reverse(), ...this.messages];
             this.totalPages = response.totalPages;
-            console.log("loadMessages", this.page);
-            if (this.page === 0) {
+            if (this.page === 0)
                 this.scrollToBottom();
-            }
+            else
+                setTimeout(() => {
+                    if (this.messagesContainer)
+                        this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight - prevScrollHeight;
+                }, 0);
         });
-    }
-
-    public nextPage(): void {
-        if (this.totalPages > this.page) {
-            this.page++;
-            this.loadMessages();
-        }
     }
 
     public sendMessage() {
         if (this.newMessage.trim()) {
+            if (this.newMessage.length > 200) {
+                this.toastrService.error("Message exceeds the maximum allowed length of 200 characters");
+                return;
+            }
+
             this.webSocketService.sendMessage(this.newMessage);
             this.newMessage = '';
         }
     }
 
-    private scrollToBottom(): void {
-        console.log("scroll1");
-        if (this.messagesContainer) {
-            console.log("scroll");
+    public scrollToBottom(): void {
+        setTimeout(() => {
+            if (!this.messagesContainer)
+                return;
             this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+        }, 0);
+    }
+
+    protected onScroll(): void {
+        if (this.messagesContainer) {
+            const scrollTop = this.messagesContainer.nativeElement.scrollTop;
+
+            if (scrollTop === 0 && this.page < this.totalPages - 1) {
+                this.page++;
+                this.loadMessages();
+            }
         }
+    }
+
+    private isScrollAtBottom(): boolean {
+        const messagesContainer = this.messagesContainer?.nativeElement;
+        const approxPosition = messagesContainer.scrollHeight - messagesContainer.scrollTop;
+        return approxPosition + 1 > messagesContainer.clientHeight && approxPosition - 1 < messagesContainer.clientHeight;
+    }
+
+    protected signOut(): void {
+        this.authService.signOut();
+        this.webSocketService.disconnect();
+    }
+
+    protected isSystemMessage(message: ChatMessageDto): boolean {
+        return message.userDto.username === "system"
     }
 }

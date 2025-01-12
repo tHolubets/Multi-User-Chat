@@ -6,7 +6,7 @@ export interface CustomUserDto {
 export interface ChatMessageDto {
     id: number;
     message: string;
-    dateTime: number[];
+    dateTime: string;
     userDto: CustomUserDto;
 }
 

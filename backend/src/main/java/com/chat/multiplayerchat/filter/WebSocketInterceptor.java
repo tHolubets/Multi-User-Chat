@@ -22,11 +22,10 @@ public class WebSocketInterceptor implements ChannelInterceptor {
     private final UserDetailsService userDetailsService;
 
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor =
-                MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        assert accessor != null;
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        if (accessor == null)
+            throw new IllegalStateException("Accessor could not be initialized. Message headers might be malformed or missing.");
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-
             String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
 
             try {
@@ -41,7 +40,6 @@ public class WebSocketInterceptor implements ChannelInterceptor {
                 throw new RuntimeException(e);
             }
         }
-
         return message;
     }
 }

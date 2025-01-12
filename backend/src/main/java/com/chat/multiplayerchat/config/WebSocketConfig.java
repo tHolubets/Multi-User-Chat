@@ -17,11 +17,12 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     private final UserDetailsService userDetailsService;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/chat");
+        registry.enableSimpleBroker("/chat", "/user");
         registry.setApplicationDestinationPrefixes("/app");
     }
 

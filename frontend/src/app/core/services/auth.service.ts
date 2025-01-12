@@ -8,7 +8,7 @@ import { ToastrService } from 'ngx-toastr';
     providedIn: 'root'
 })
 export class AuthService {
-    
+
     constructor(
         private _httpClient: HttpClient,
         private _toastrService: ToastrService,
@@ -17,6 +17,10 @@ export class AuthService {
     public isLoggedIn(): boolean {
         let token = localStorage.getItem('token');
         return token != null;
+    }
+
+    public signOut(): void {
+        localStorage.removeItem('token');
     }
 
     public setToken(token: string): void {
@@ -42,7 +46,7 @@ export class AuthService {
     }
 
     public login(username: string, password: string): Observable<boolean> {
-        const authBody = {username: username, password: password};
+        const authBody = { username: username, password: password };
         return this._httpClient.post<any>(`${environment.apiUrl}/auth/login`, authBody, { observe: "response" })
             .pipe(map((response: HttpResponse<any>) => {
                 if (response.status === 200 && response.body !== null) {
@@ -53,10 +57,10 @@ export class AuthService {
                     return false;
                 }
             }),
-            catchError((error) => {
-                this._toastrService.error("Login data is not valid. Try again.")
-                return of(false);
-            })
-        );
+                catchError((error) => {
+                    this._toastrService.error("Login data is not valid. Try again.")
+                    return of(false);
+                })
+            );
     }
 }

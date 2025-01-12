@@ -16,7 +16,8 @@ export class ChatService {
     public getMessages(page: number, size: number): Observable<MessageResponseDto> {
         const params = new HttpParams()
             .set('page', page.toString())
-            .set('size', size.toString());
+            .set('size', size.toString())
+            .set('sort', 'id,desc');
 
         return this._httpClient.get<MessageResponseDto>(`${environment.apiUrl}/chat/messages`, {
             params
