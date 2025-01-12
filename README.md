@@ -84,7 +84,7 @@ Use the following default credentials to log in:
 
 <h3>Example of Running Containers</h3>
 
-![Running Docker Containers](https://github.com/tHolubets/Multi-User-Chat/blob/master/assets/docker)
+![Running Docker Containers](https://github.com/tHolubets/Multi-User-Chat/blob/master/assets/docker.png)
 
 
 
