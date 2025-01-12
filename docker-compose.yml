@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:15.2
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - chat-network
+
+  chat-backend:
+    build:
+      context: ./backend
+    container_name: chat-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=postgres
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_TIME=${JWT_EXPIRATION_TIME}
+    depends_on:
+      - postgres
+    networks:
+      - chat-network
+
+  chat-frontend:
+    build:
+      context: ./frontend
+    container_name: chat-frontend
+    ports:
+      - "4200:4200"
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    name: chat-network
