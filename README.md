@@ -73,14 +73,17 @@ Use the following default credentials to log in:
 <h2>Interface</h2>
 
 <h3>Login page</h3>
+
 ![Login page](https://github.com/tHolubets/Multi-User-Chat/blob/master/assets/login.png)
 
 
 <h3>Chat page</h3>
+
 ![Chat page](https://github.com/tHolubets/Multi-User-Chat/blob/master/assets/chat.png)
 
 
 <h3>Example of Running Containers</h3>
+
 ![Running Docker Containers](https://github.com/tHolubets/Multi-User-Chat/blob/master/assets/docker)
 
 
